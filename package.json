@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-"homepage": "https://Lemuel-Jebas-K-URK23CS1172.github.io/Farm_To_Table_Game",
+"homepage": "https://Lemuel-Jebas-K-URK23CS1172.github.io/FarmToTableGame",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
