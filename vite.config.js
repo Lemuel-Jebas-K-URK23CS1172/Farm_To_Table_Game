@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/FarmToTableGame/', // 👈 MUST MATCH your repo name exactly (case sensitive)
-})
+  base: '/FarmToTableGame/', // 👈 CASE SENSITIVE — must match your repo name exactly!
+});
