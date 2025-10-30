@@ -1,11 +1,9 @@
+// src/pages/Home.jsx
+import React from "react";
 import { Link } from "react-router-dom";
 
-
-// client/src/pages/Home.jsx
 export default function Home() {
   return (
-    <Link to="/login">Login</Link>
-<Link to="/register">Register</Link>
     <div
       style={{
         minHeight: "100vh",
@@ -18,11 +16,13 @@ export default function Home() {
         gap: "1rem",
       }}
     >
-      <h1 style={{ fontSize: "clamp(24px, 4vw, 40px)" }}>Welcome to Farm to Table Rescue!</h1>
+      <h1 style={{ fontSize: "clamp(24px, 4vw, 40px)" }}>
+        Welcome to Farm to Table Rescue!
+      </h1>
       <p>Choose an option below to get started:</p>
       <div style={{ display: "flex", gap: "12px" }}>
-        <a
-          href="/login"
+        <Link
+          to="/login"
           style={{
             padding: "10px 20px",
             borderRadius: 8,
@@ -33,9 +33,9 @@ export default function Home() {
           }}
         >
           🔑 Login
-        </a>
-        <a
-          href="/register"
+        </Link>
+        <Link
+          to="/register"
           style={{
             padding: "10px 20px",
             borderRadius: 8,
@@ -46,10 +46,8 @@ export default function Home() {
           }}
         >
           🧾 Register
-        </a>
+        </Link>
       </div>
     </div>
   );
 }
-
-
