@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 
-<Link to="/login">Login</Link>
-<Link to="/register">Register</Link>
+
 // client/src/pages/Home.jsx
 export default function Home() {
   return (
+    <Link to="/login">Login</Link>
+<Link to="/register">Register</Link>
     <div
       style={{
         minHeight: "100vh",
@@ -50,4 +51,5 @@ export default function Home() {
     </div>
   );
 }
+
 
