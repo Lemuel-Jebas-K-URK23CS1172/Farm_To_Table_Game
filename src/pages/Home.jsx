@@ -4,48 +4,14 @@ import { Link } from "react-router-dom";
 
 export default function Home() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0f0f10",
-        color: "#fff",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "1rem",
-      }}
-    >
-      <h1 style={{ fontSize: "clamp(24px, 4vw, 40px)" }}>
-        Welcome to Farm to Table Rescue!
-      </h1>
-      <p>Choose an option below to get started:</p>
-      <div style={{ display: "flex", gap: "12px" }}>
-        <Link
-          to="/login"
-          style={{
-            padding: "10px 20px",
-            borderRadius: 8,
-            background: "#3b82f6",
-            color: "#fff",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          🔑 Login
+    <div style={{ textAlign: "center", color: "#fff", marginTop: "100px" }}>
+      <h1>Welcome to Farm to Table Rescue</h1>
+      <div style={{ marginTop: "20px" }}>
+        <Link to="/login" style={{ marginRight: "20px", color: "#4ade80" }}>
+          Login
         </Link>
-        <Link
-          to="/register"
-          style={{
-            padding: "10px 20px",
-            borderRadius: 8,
-            background: "#22c55e",
-            color: "#fff",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          🧾 Register
+        <Link to="/register" style={{ color: "#60a5fa" }}>
+          Register
         </Link>
       </div>
     </div>
