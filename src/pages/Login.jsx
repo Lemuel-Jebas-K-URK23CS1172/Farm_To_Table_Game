@@ -24,7 +24,8 @@ export default function Login() {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      navigate("/dashboard"); // redirect to game page
+      navigate("/game", { replace: true });
+ // redirect to game page
     } catch (err) {
       console.error("❌ Login error:", err.response?.data || err.message);
       setError(err.response?.data?.msg || "Login failed. Please try again.");
@@ -149,3 +150,4 @@ export default function Login() {
     </div>
   );
 }
+
