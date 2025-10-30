@@ -1,6 +1,10 @@
 // client/src/pages/GamePage.jsx
 import React from "react";
 import GameCanvas from "../game/GameCanvas";
+const userData = JSON.parse(localStorage.getItem("user"));
+if (!userData) {
+  return <p style={{ color: "white" }}>Please login again.</p>;
+}
 
 export default function GamePage() {
   return (
@@ -12,3 +16,4 @@ export default function GamePage() {
     </div>
   );
 }
+
