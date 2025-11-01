@@ -1,21 +1,18 @@
 // src/pages/GamePage.jsx
-import React, { useEffect } from "react";
+import React, { useState } from "react";
+import GameCanvas from "../components/GameCanvas.jsx";
 import { useNavigate } from "react-router-dom";
-import GameCanvas from "../components/GameCanvas";
- // adjust the path if needed
 
 export default function GamePage() {
   const navigate = useNavigate();
+  const [restartKey, setRestartKey] = useState(0); // trigger re-render
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-    }
-  }, [navigate]);
+  const handleRestart = () => {
+    // re-render canvas by changing key
+    setRestartKey((prev) => prev + 1);
+  };
 
-  const handleLogout = () => {
-    localStorage.clear();
+  const handleBackHome = () => {
     navigate("/login");
   };
 
@@ -23,49 +20,78 @@ export default function GamePage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #0f766e, #042f2e)",
-        color: "white",
-        fontFamily: "Poppins, sans-serif",
+        background: "linear-gradient(to bottom right, #042b2a, #0ea5a3)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: 20,
+        overflow: "hidden",
+        padding: "1rem",
       }}
     >
-      <h1 style={{ fontSize: "2rem", marginBottom: 20 }}>🌾 Farm to Table Rescue</h1>
-
+      {/* Game container */}
       <div
         style={{
-          width: "90%",
-          maxWidth: 800,
-          height: 450,
-          border: "2px solid limegreen",
-          borderRadius: 12,
+          position: "relative",
+          width: "90vw",
+          height: "80vh",
+          maxWidth: "1000px",
+          maxHeight: "700px",
+          background: "rgba(255,255,255,0.1)",
+          borderRadius: "16px",
+          boxShadow: "0 0 20px rgba(0,0,0,0.3)",
           overflow: "hidden",
-          backgroundColor: "black",
         }}
       >
-        <GameCanvas />
-      </div>
+        <GameCanvas key={restartKey} />
 
-      <button
-        onClick={handleLogout}
-        style={{
-          marginTop: 20,
-          background: "#f87171",
-          color: "white",
-          border: "none",
-          borderRadius: 8,
-          padding: "10px 16px",
-          cursor: "pointer",
-          fontWeight: 600,
-        }}
-      >
-        Logout
-      </button>
+        {/* Overlay buttons */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "10px",
+            right: "10px",
+            display: "flex",
+            gap: "10px",
+          }}
+        >
+          <button
+            onClick={handleRestart}
+            style={{
+              background: "#7dd3fc",
+              color: "#042b2a",
+              border: "none",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "0.2s",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = "#bae6fd")}
+            onMouseOut={(e) => (e.currentTarget.style.background = "#7dd3fc")}
+          >
+            Restart
+          </button>
+
+          <button
+            onClick={handleBackHome}
+            style={{
+              background: "#fca5a5",
+              color: "#042b2a",
+              border: "none",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "0.2s",
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = "#fecaca")}
+            onMouseOut={(e) => (e.currentTarget.style.background = "#fca5a5")}
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
-
-
