@@ -1,22 +1,28 @@
-// client/src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import GamePage from "./pages/GamePage";
-
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" />;
-}
+import { Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import GamePage from "./pages/GamePage.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
 
 export default function App() {
   return (
-    <Router basename="/FarmToTableGame">
+    <AuthProvider>
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/game"
           element={
@@ -25,8 +31,8 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<h2 style={{ color: "white" }}>404 - Not Found</h2>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </Router>
+    </AuthProvider>
   );
 }
