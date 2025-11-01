@@ -3,10 +3,10 @@ import { useRef, useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import axios from "axios";
-import backgroundImg from "./assets/background.png";
-import farmerImg from "./assets/farmer.png";
-import fruitImg from "./assets/apple.png";
-import monsterImg from "./assets/monster.png";
+import backgroundImg from "./game/assets/background.png";
+import farmerImg from "./game/assets/farmer.png";
+import fruitImg from "./game/assets/apple.png";
+import monsterImg from "./game/assets/monster.png";
 
 export default function GameCanvas() {
   const canvasRef = useRef(null);
@@ -395,3 +395,4 @@ export default function GameCanvas() {
     </div>
   );
 }
+
