@@ -20,8 +20,9 @@ jobs:
         with:
           node-version: 20
 
+      # ✅ use npm install instead of npm ci (avoids rolldown bug)
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build project
         run: npm run build
