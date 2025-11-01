@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 name: Deploy Vite app to GitHub Pages
 
 on:
@@ -21,13 +20,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install
-
-      # ✅ Add execute permissions to vite (fixes “Permission denied”)
-      - name: Fix vite permission
-        run: chmod +x ./node_modules/.bin/vite
+        run: npm install
 
       - name: Build project
         run: npm run build
