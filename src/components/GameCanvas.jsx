@@ -217,6 +217,10 @@ export default function GameCanvas() {
     cancelAnimationFrame(frameId.current);
     setGameOver(true);
     saveScore();
+    if (hit) {
+    setGameOver(true);
+    saveGameScore(score, level);
+    }
 
     // focus restart button shortly after modal opens
     setTimeout(() => {
@@ -395,5 +399,6 @@ export default function GameCanvas() {
     </div>
   );
 }
+
 
 
