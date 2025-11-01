@@ -1,7 +1,8 @@
 // src/pages/GamePage.jsx
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import GameCanvas from "../components/GameCanvas"; // adjust the path if needed
+import GameCanvas from "../components/GameCanvas.jsx";
+ // adjust the path if needed
 
 export default function GamePage() {
   const navigate = useNavigate();
@@ -66,3 +67,4 @@ export default function GamePage() {
     </div>
   );
 }
+
