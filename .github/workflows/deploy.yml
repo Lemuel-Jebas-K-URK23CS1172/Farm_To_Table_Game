@@ -20,9 +20,14 @@ jobs:
         with:
           node-version: 20
 
-      # ✅ use npm install instead of npm ci (avoids rolldown bug)
       - name: Install dependencies
-        run: npm install
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
+
+      # ✅ Add execute permissions to vite (fixes “Permission denied”)
+      - name: Fix vite permission
+        run: chmod +x ./node_modules/.bin/vite
 
       - name: Build project
         run: npm run build
