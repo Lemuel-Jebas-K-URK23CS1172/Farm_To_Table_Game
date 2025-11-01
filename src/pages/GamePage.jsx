@@ -1,32 +1,54 @@
-import React from "react";
+// src/pages/GamePage.jsx
+import React, { useEffect, useState } from "react";
 import GameCanvas from "../components/GameCanvas.jsx";
 
 export default function GamePage() {
+  const [viewportSize, setViewportSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  // Dynamically update on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const gameWidth = Math.min(viewportSize.width * 0.9, 1280);
+  const gameHeight = (gameWidth * 9) / 16;
+
   return (
     <div
       style={{
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
         width: "100vw",
-        background: "radial-gradient(circle at center, #031d1c 0%, #000000 100%)",
+        height: "100vh",
         overflow: "hidden",
+        background: "radial-gradient(circle at center, #001818 0%, #000000 100%)",
       }}
     >
       <div
         style={{
-          width: "90vw",
-          maxWidth: "1280px",
-          aspectRatio: "16/9",
-          borderRadius: "12px",
-          overflow: "hidden",
+          width: gameWidth,
+          height: gameHeight,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           border: "3px solid #00ffcc",
-          boxShadow: "0 0 25px rgba(0,255,200,0.2)",
+          borderRadius: "12px",
           backgroundColor: "#000",
+          boxShadow: "0 0 25px rgba(0,255,200,0.3)",
         }}
       >
-        <GameCanvas />
+        <GameCanvas width={gameWidth} height={gameHeight} />
       </div>
     </div>
   );
