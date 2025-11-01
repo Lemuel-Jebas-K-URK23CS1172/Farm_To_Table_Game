@@ -1,32 +1,37 @@
+# .github/workflows/deploy.yml
 name: Deploy Vite app to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
-
-permissions:
-  contents: write
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Setup Node
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Install dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install --legacy-peer-deps
-      - name: Build Vite app
+        working-directory: ./client
+        run: npm ci
+
+      - name: Build project
+        working-directory: ./client
         run: npm run build
-        - name: Deploy to GitHub Pages
-          uses: peaceiris/actions-gh-pages@v3
-          with:
-              github_token: ${{ secrets.GITHUB_TOKEN }}
-              publish_dir: ./dist
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./client/dist
