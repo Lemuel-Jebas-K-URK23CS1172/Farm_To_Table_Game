@@ -9,20 +9,24 @@ export default function GamePage() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#121212",
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: "#101010",
+        margin: 0,
+        padding: 0,
         overflow: "hidden",
       }}
     >
       <div
         style={{
-          width: "90%",
-          maxWidth: "1000px",
-          aspectRatio: "16/9",
-          border: "3px solid #00ff66",
+          position: "relative",
+          width: "min(90vw, 1280px)", // dynamic width: 90% of viewport, max 1280px
+          height: "calc(min(90vw, 1280px) * 9 / 16)", // maintains 16:9 ratio
+          border: "3px solid #00ff88",
           borderRadius: "12px",
           overflow: "hidden",
-          boxShadow: "0 0 20px rgba(0,255,100,0.3)",
+          boxShadow: "0 0 25px rgba(0,255,100,0.3)",
+          backgroundColor: "#000",
         }}
       >
         <GameCanvas />
