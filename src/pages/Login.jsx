@@ -9,9 +9,32 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(null);
+  setLoading(true);
+
+  try {
+    const res = await API.post("/auth/login", form);
+    const { token, user } = res.data;
+
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // ✅ Navigate correctly based on role
+    if (user.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/game");
+    }
+  } catch (err) {
+    console.error("Login error:", err.response?.data || err.message);
+    setError("Invalid credentials. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -133,3 +156,4 @@ export default function Login() {
     </div>
   );
 }
+
