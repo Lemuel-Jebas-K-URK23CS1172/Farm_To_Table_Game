@@ -2,7 +2,7 @@
 import { useRef, useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-import { API } from "../api";
+import { API } from "../services/api";
 
 import backgroundImg from "../game/assets/background.png";
 import farmerImg from "../game/assets/farmer.png";
@@ -346,3 +346,4 @@ export default function GameCanvas() {
     </div>
   );
 }
+
