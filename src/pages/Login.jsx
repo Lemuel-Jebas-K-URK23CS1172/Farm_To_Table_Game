@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API } from "../api"; // ✅ make sure this path is correct (../api or ../services/api)
+import { API } from "../services/api"; // ✅ make sure this path is correct (../api or ../services/api)
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -131,3 +131,4 @@ export default function Login() {
     </div>
   );
 }
+
