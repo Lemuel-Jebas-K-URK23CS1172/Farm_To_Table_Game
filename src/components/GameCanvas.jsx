@@ -238,7 +238,14 @@ export default function GameCanvas() {
   const saveScore = async () => {
     try {
       console.log("Saving final score:", scoreRef.current, level);
-      await API.post("/scores/save", { score: scoreRef.current, level });
+      console.log("🟢 Sending to backend:", {
+  scoreState: score,
+  scoreRef: scoreRef.current,
+  level,
+});
+
+await API.post("/scores/save", { score: scoreRef.current, level });
+
       console.log("✅ Score saved successfully");
     } catch (err) {
       console.error("❌ Error saving on game over:", err.message);
@@ -394,3 +401,4 @@ export default function GameCanvas() {
     </div>
   );
 }
+
