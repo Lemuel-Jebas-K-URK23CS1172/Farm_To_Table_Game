@@ -7,6 +7,10 @@ import Dashboard from "./pages/Dashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
+import AdminPage from "./pages/AdminPage";
+
+// ...
+<Route path="/admin" element={<AdminPage />} />
 
 export default function App() {
   return (
