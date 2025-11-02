@@ -1,6 +1,6 @@
 // src/pages/GamePage.jsx
 import React from "react";
-import GameCanvas from "../game/GameCanvas";
+import GameCanvas from "../components/GameCanvas";
 
 export default function GamePage() {
   return (
@@ -20,3 +20,4 @@ export default function GamePage() {
     </div>
   );
 }
+
