@@ -36,6 +36,12 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        {user?.role === "admin" && (
+  <Link to="/admin" style={{ color: "#00ff88", fontWeight: "bold", textDecoration: "none" }}>
+    🛠️ Admin Dashboard
+  </Link>
+)}
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AuthProvider>
