@@ -11,9 +11,23 @@ export default function Login() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  e.preventDefault();
+  try {
+    const res = await axios.post(
+      "https://farmtotablegameserver-production.up.railway.app/api/auth/login",
+      form
+    );
+
+    localStorage.setItem("token", res.data.token); // ✅ Store JWT
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+
+    alert("✅ Logged in successfully!");
+    navigate("/game"); // go straight to game
+  } catch (err) {
+    console.error("❌ Login error:", err);
+    setError("Invalid credentials");
+  }
+};
 
     try {
       const res = await API.post("/auth/login", form);
@@ -85,5 +99,6 @@ export default function Login() {
     </div>
   );
 }
+
 
 
