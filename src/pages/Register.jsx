@@ -1,24 +1,35 @@
+// src/pages/Register.jsx
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { API } from "../services/api";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "user", // default
+  });
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setLoading(true);
 
     try {
       const res = await API.post("/auth/register", form);
       console.log("✅ Registered user:", res.data);
+
       navigate("/login");
     } catch (err) {
-      console.error("❌ Register error:", err);
+      console.error("❌ Register error:", err.response?.data || err.message);
       setError("Registration failed. Please check your inputs and try again.");
     } finally {
       setLoading(false);
@@ -28,176 +39,130 @@ export default function Register() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #042b2a, #0ea5a3)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "white",
+        minHeight: "100vh",
+        backgroundColor: "#0a0a0a",
+        color: "#fff",
       }}
     >
       <div
         style={{
-          background: "rgba(0,0,0,0.5)",
-          borderRadius: 12,
+          backgroundColor: "#111",
+          borderRadius: "12px",
           padding: "40px",
-          width: "min(90%, 400px)",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.3)",
+          width: "90%",
+          maxWidth: "400px",
+          textAlign: "center",
+          boxShadow: "0 0 25px rgba(0, 0, 0, 0.6)",
         }}
       >
-        <h2
-          style={{
-            textAlign: "center",
-            marginBottom: 24,
-            color: "#7dd3fc",
-            fontSize: "1.8rem",
-          }}
-        >
-          Create Your Account
-        </h2>
-
+        <h2 style={{ marginBottom: "20px" }}>🌱 Create Account</h2>
         <form onSubmit={handleSubmit}>
-          {/* Name Field */}
-          <label style={{ display: "block", marginBottom: 12 }}>
-            Name
+          <div style={{ marginBottom: "16px" }}>
             <input
               type="text"
+              name="name"
+              placeholder="Full Name"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={handleChange}
               required
               style={{
                 width: "100%",
                 padding: "10px",
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                marginTop: 4,
-                background: "#f8f8f8",
+                borderRadius: "6px",
+                border: "1px solid #555",
+                background: "#222",
+                color: "#fff",
               }}
             />
-          </label>
-
-          {/* Email Field */}
-          <label style={{ display: "block", marginBottom: 12 }}>
-            Email
+          </div>
+          <div style={{ marginBottom: "16px" }}>
             <input
               type="email"
+              name="email"
+              placeholder="Email"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={handleChange}
               required
               style={{
                 width: "100%",
                 padding: "10px",
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                marginTop: 4,
-                background: "#f8f8f8",
+                borderRadius: "6px",
+                border: "1px solid #555",
+                background: "#222",
+                color: "#fff",
               }}
             />
-          </label>
-
-          {/* Password Field */}
-          <label style={{ display: "block", marginBottom: 12 }}>
-            Password
+          </div>
+          <div style={{ marginBottom: "16px" }}>
             <input
               type="password"
+              name="password"
+              placeholder="Password"
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onChange={handleChange}
               required
               style={{
                 width: "100%",
                 padding: "10px",
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                marginTop: 4,
-                background: "#f8f8f8",
+                borderRadius: "6px",
+                border: "1px solid #555",
+                background: "#222",
+                color: "#fff",
               }}
             />
-          </label>
+          </div>
 
-          {/* Role Selection */}
-          <label style={{ display: "block", marginBottom: 12 }}>
-            Select Role
+          {/* Select role */}
+          <div style={{ marginBottom: "16px" }}>
             <select
+              name="role"
               value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              onChange={handleChange}
               style={{
                 width: "100%",
                 padding: "10px",
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                marginTop: 4,
-                background: "#f8f8f8",
-                cursor: "pointer",
+                borderRadius: "6px",
+                border: "1px solid #555",
+                background: "#222",
+                color: "#fff",
               }}
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
-          </label>
+          </div>
 
-          {/* Error Message */}
           {error && (
-            <div
-              role="alert"
-              style={{
-                color: "#ffb4b4",
-                background: "rgba(255, 50, 50, 0.06)",
-                padding: "10px 12px",
-                borderRadius: 8,
-                border: "1px solid rgba(255,50,50,0.08)",
-                marginTop: 12,
-                textAlign: "center",
-              }}
-            >
-              {error}
-            </div>
+            <div style={{ color: "#ff6666", marginBottom: "12px" }}>{error}</div>
           )}
 
-          {/* Buttons */}
-          <div
+          <button
+            type="submit"
+            disabled={loading}
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              marginTop: 20,
+              backgroundColor: "#00cc66",
+              color: "#111",
+              border: "none",
+              borderRadius: "8px",
+              padding: "10px 18px",
+              cursor: "pointer",
+              fontWeight: "700",
+              width: "100%",
             }}
           >
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: "10px 18px",
-                background: "#0ea5a3",
-                color: "#042b2a",
-                border: "none",
-                borderRadius: 10,
-                fontWeight: 700,
-                cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "1rem",
-              }}
-            >
-              {loading ? "Creating account..." : "Register"}
-            </button>
-
-            <div style={{ textAlign: "center", color: "rgba(255,255,255,0.8)" }}>
-              Already have an account?{" "}
-              <Link to="/login" style={{ color: "#7dd3fc", fontWeight: 700 }}>
-                Login
-              </Link>
-            </div>
-          </div>
+            {loading ? "Registering..." : "Register"}
+          </button>
         </form>
 
-        <div
-          style={{
-            marginTop: 18,
-            color: "rgba(255,255,255,0.3)",
-            fontSize: 12,
-            textAlign: "center",
-          }}
-        >
-          By registering you agree to our placeholder terms.
-        </div>
+        <p style={{ marginTop: "16px" }}>
+          Already have an account?{" "}
+          <Link to="/" style={{ color: "#00ccff", fontWeight: "700" }}>
+            Login
+          </Link>
+        </p>
       </div>
     </div>
   );
