@@ -1,16 +1,16 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API } from "../services/api";
+import { API } from "../api"; // ✅ same path as Login.jsx
 
 export default function Register() {
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    role: "user", // default
+    role: "user", // ✅ default role
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -20,17 +20,17 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setError("");
     setLoading(true);
 
     try {
       const res = await API.post("/auth/register", form);
       console.log("✅ Registered user:", res.data);
 
-      navigate("/login");
+      navigate("/"); // redirect to login after register
     } catch (err) {
-      console.error("❌ Register error:", err.response?.data || err.message);
-      setError("Registration failed. Please check your inputs and try again.");
+      console.error("❌ Register failed:", err);
+      setError("Registration failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -39,127 +39,118 @@ export default function Register() {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         minHeight: "100vh",
-        backgroundColor: "#0a0a0a",
+        backgroundColor: "#000",
         color: "#fff",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       <div
         style={{
           backgroundColor: "#111",
-          borderRadius: "12px",
           padding: "40px",
+          borderRadius: "12px",
           width: "90%",
-          maxWidth: "400px",
+          maxWidth: "420px",
+          boxShadow: "0 0 25px rgba(0,0,0,0.6)",
           textAlign: "center",
-          boxShadow: "0 0 25px rgba(0, 0, 0, 0.6)",
         }}
       >
-        <h2 style={{ marginBottom: "20px" }}>🌱 Create Account</h2>
+        <h2 style={{ marginBottom: "20px" }}>🌾 Register Account</h2>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "16px" }}>
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "6px",
-                border: "1px solid #555",
-                background: "#222",
-                color: "#fff",
-              }}
-            />
-          </div>
-          <div style={{ marginBottom: "16px" }}>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "6px",
-                border: "1px solid #555",
-                background: "#222",
-                color: "#fff",
-              }}
-            />
-          </div>
-          <div style={{ marginBottom: "16px" }}>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "6px",
-                border: "1px solid #555",
-                background: "#222",
-                color: "#fff",
-              }}
-            />
-          </div>
-
-          {/* Select role */}
-          <div style={{ marginBottom: "16px" }}>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "6px",
-                border: "1px solid #555",
-                background: "#222",
-                color: "#fff",
-              }}
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={form.name}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "14px",
+              borderRadius: "6px",
+              border: "1px solid #555",
+              background: "#222",
+              color: "#fff",
+            }}
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "14px",
+              borderRadius: "6px",
+              border: "1px solid #555",
+              background: "#222",
+              color: "#fff",
+            }}
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "14px",
+              borderRadius: "6px",
+              border: "1px solid #555",
+              background: "#222",
+              color: "#fff",
+            }}
+          />
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "14px",
+              borderRadius: "6px",
+              border: "1px solid #555",
+              background: "#222",
+              color: "#fff",
+            }}
+          >
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
           {error && (
-            <div style={{ color: "#ff6666", marginBottom: "12px" }}>{error}</div>
+            <p style={{ color: "#ff5555", marginBottom: "10px" }}>{error}</p>
           )}
-
           <button
             type="submit"
             disabled={loading}
             style={{
+              width: "100%",
               backgroundColor: "#00cc66",
               color: "#111",
-              border: "none",
-              borderRadius: "8px",
-              padding: "10px 18px",
-              cursor: "pointer",
               fontWeight: "700",
-              width: "100%",
+              border: "none",
+              borderRadius: "6px",
+              padding: "10px",
+              cursor: "pointer",
             }}
           >
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
-
-        <p style={{ marginTop: "16px" }}>
+        <p style={{ marginTop: "14px" }}>
           Already have an account?{" "}
-          <Link to="/" style={{ color: "#00ccff", fontWeight: "700" }}>
+          <Link to="/" style={{ color: "#00ccff" }}>
             Login
           </Link>
         </p>
