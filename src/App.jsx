@@ -16,18 +16,18 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter basename="/FarmToTableGame">
         <Routes>
-          {/* Public routes */}
+          {/* Public Routes */}
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Protected user routes */}
+          {/* User Routes */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/game" element={<GamePage />} />
 
-          {/* Admin route */}
+          {/* Admin Route */}
           <Route path="/admin" element={<AdminDashboard />} />
 
-          {/* Catch-all route */}
+          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
