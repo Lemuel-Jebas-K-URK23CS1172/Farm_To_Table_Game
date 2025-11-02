@@ -1,7 +1,7 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API } from "../api"; // ✅ same path as Login.jsx
+import { API } from "../services/api"; // ✅ same path as Login.jsx
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -158,3 +158,4 @@ export default function Register() {
     </div>
   );
 }
+
