@@ -1,78 +1,204 @@
-import express from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { API } from "../services/api";
 
-const router = express.Router();
+export default function Register() {
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-// ✅ REGISTER (with user/admin role selection)
-router.post("/register", async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+    try {
+      const res = await API.post("/auth/register", form);
+      console.log("✅ Registered user:", res.data);
+      navigate("/login");
+    } catch (err) {
+      console.error("❌ Register error:", err);
+      setError("Registration failed. Please check your inputs and try again.");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #042b2a, #0ea5a3)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "white",
+      }}
+    >
+      <div
+        style={{
+          background: "rgba(0,0,0,0.5)",
+          borderRadius: 12,
+          padding: "40px",
+          width: "min(90%, 400px)",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.3)",
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            marginBottom: 24,
+            color: "#7dd3fc",
+            fontSize: "1.8rem",
+          }}
+        >
+          Create Your Account
+        </h2>
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+        <form onSubmit={handleSubmit}>
+          {/* Name Field */}
+          <label style={{ display: "block", marginBottom: 12 }}>
+            Name
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                marginTop: 4,
+                background: "#f8f8f8",
+              }}
+            />
+          </label>
 
-    // ✅ Allow user to select role (for demo only)
-    const validRole = role === "admin" ? "admin" : "user";
+          {/* Email Field */}
+          <label style={{ display: "block", marginBottom: 12 }}>
+            Email
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                marginTop: 4,
+                background: "#f8f8f8",
+              }}
+            />
+          </label>
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role: validRole,
-    });
+          {/* Password Field */}
+          <label style={{ display: "block", marginBottom: 12 }}>
+            Password
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                marginTop: 4,
+                background: "#f8f8f8",
+              }}
+            />
+          </label>
 
-    res.status(201).json({
-      message: `User registered successfully as ${validRole}`,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
-  } catch (err) {
-    console.error("❌ Register error:", err.message);
-    res.status(500).json({ message: "Server error" });
-  }
-});
+          {/* Role Selection */}
+          <label style={{ display: "block", marginBottom: 12 }}>
+            Select Role
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                marginTop: 4,
+                background: "#f8f8f8",
+                cursor: "pointer",
+              }}
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
 
-// ✅ LOGIN
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+          {/* Error Message */}
+          {error && (
+            <div
+              role="alert"
+              style={{
+                color: "#ffb4b4",
+                background: "rgba(255, 50, 50, 0.06)",
+                padding: "10px 12px",
+                borderRadius: 8,
+                border: "1px solid rgba(255,50,50,0.08)",
+                marginTop: 12,
+                textAlign: "center",
+              }}
+            >
+              {error}
+            </div>
+          )}
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+          {/* Buttons */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              marginTop: 20,
+            }}
+          >
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                padding: "10px 18px",
+                background: "#0ea5a3",
+                color: "#042b2a",
+                border: "none",
+                borderRadius: 10,
+                fontWeight: 700,
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "1rem",
+              }}
+            >
+              {loading ? "Creating account..." : "Register"}
+            </button>
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+            <div style={{ textAlign: "center", color: "rgba(255,255,255,0.8)" }}>
+              Already have an account?{" "}
+              <Link to="/login" style={{ color: "#7dd3fc", fontWeight: 700 }}>
+                Login
+              </Link>
+            </div>
+          </div>
+        </form>
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-
-    res.json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
-  } catch (err) {
-    console.error("❌ Login error:", err.message);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-export default router;
+        <div
+          style={{
+            marginTop: 18,
+            color: "rgba(255,255,255,0.3)",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          By registering you agree to our placeholder terms.
+        </div>
+      </div>
+    </div>
+  );
+}
