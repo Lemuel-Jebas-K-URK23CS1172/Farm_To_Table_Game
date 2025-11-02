@@ -7,6 +7,12 @@ export default function AdminDashboard() {
   const { user } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [scores, setScores] = useState([]);
+  const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  navigate("/");
+};
+
 
   useEffect(() => {
     const fetchData = async () => {
