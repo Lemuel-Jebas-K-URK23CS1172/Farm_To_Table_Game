@@ -1,40 +1,40 @@
+// src/pages/Login.jsx
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { API } from "../services/api";
-export default function Login() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+import { useNavigate, Link } from "react-router-dom";
+import { API } from "../api";
+
+export default function LoginPage() {
   const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  // Handle field updates
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
+  // ✅ Make this function async to use "await"
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const res = await axios.post(
-      "https://farmtotablegameserver-production.up.railway.app/api/auth/login",
-      form
-    );
-
-    localStorage.setItem("token", res.data.token); // ✅ Store JWT
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-
-    alert("✅ Logged in successfully!");
-    navigate("/game"); // go straight to game
-  } catch (err) {
-    console.error("❌ Login error:", err);
-    setError("Invalid credentials");
-  }
-};
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
 
     try {
+      // Login to Railway backend
       const res = await API.post("/auth/login", form);
+
+      // ✅ Save token and user data
+      localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      console.log("✅ Logged in:", res.data.user);
+
+      // ✅ Redirect directly to the game
       navigate("/game");
     } catch (err) {
-      setError("Invalid email or password");
+      console.error("❌ Login error:", err.response?.data || err.message);
+      setError("Invalid credentials. Please check your email and password.");
     } finally {
       setLoading(false);
     }
@@ -43,32 +43,83 @@ export default function Login() {
   return (
     <div
       style={{
-        height: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(145deg, #072a2a, #041f1f)",
+        minHeight: "100vh",
+        backgroundColor: "#0a0a0a",
+        color: "#fff",
+        fontFamily: "Poppins, sans-serif",
       }}
     >
       <div
         style={{
-          width: "100%",
-          maxWidth: 400,
+          backgroundColor: "rgba(255,255,255,0.06)",
           padding: "40px",
-          backgroundColor: "rgba(255, 255, 255, 0.08)",
-          borderRadius: 16,
-          boxShadow: "0 0 20px rgba(0,255,200,0.2)",
+          borderRadius: "12px",
+          width: "100%",
+          maxWidth: "400px",
+          boxShadow: "0 0 20px rgba(0,0,0,0.5)",
         }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: 20, color: "#00ffc6" }}>Login</h2>
+        <h1 style={{ textAlign: "center", marginBottom: "20px", color: "#4fd1c5" }}>
+          🌾 Farm to Table Rescue
+        </h1>
+        <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#90cdf4" }}>
+          Login
+        </h2>
+
         <form onSubmit={handleSubmit}>
-          <label>Email</label>
-          <input name="email" type="email" onChange={handleChange} required />
-          <label style={{ marginTop: 10 }}>Password</label>
-          <input name="password" type="password" onChange={handleChange} required />
+          <label style={{ display: "block", marginBottom: "8px" }}>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "15px",
+              borderRadius: "8px",
+              border: "1px solid #666",
+              backgroundColor: "#1a1a1a",
+              color: "#fff",
+            }}
+          />
+
+          <label style={{ display: "block", marginBottom: "8px" }}>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "20px",
+              borderRadius: "8px",
+              border: "1px solid #666",
+              backgroundColor: "#1a1a1a",
+              color: "#fff",
+            }}
+          />
 
           {error && (
-            <div style={{ color: "#ffb3b3", marginTop: 8, textAlign: "center" }}>{error}</div>
+            <div
+              style={{
+                color: "#ff6b6b",
+                background: "rgba(255, 50, 50, 0.1)",
+                padding: "10px",
+                borderRadius: "8px",
+                marginBottom: "15px",
+                border: "1px solid rgba(255,50,50,0.2)",
+                textAlign: "center",
+              }}
+            >
+              {error}
+            </div>
           )}
 
           <button
@@ -76,22 +127,29 @@ export default function Login() {
             disabled={loading}
             style={{
               width: "100%",
-              marginTop: 16,
-              backgroundColor: "#00ffc3",
+              padding: "10px",
+              backgroundColor: loading ? "#444" : "#38b2ac",
+              color: "#fff",
+              fontWeight: "bold",
               border: "none",
-              borderRadius: 10,
-              color: "#042a29",
-              padding: "10px 0",
-              fontWeight: 700,
-              cursor: "pointer",
+              borderRadius: "8px",
+              cursor: loading ? "not-allowed" : "pointer",
+              transition: "background 0.2s ease",
             }}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <p style={{ marginTop: 12, textAlign: "center", color: "rgba(255,255,255,0.7)" }}>
+
+        <p
+          style={{
+            marginTop: "15px",
+            textAlign: "center",
+            color: "rgba(255,255,255,0.8)",
+          }}
+        >
           Don’t have an account?{" "}
-          <Link to="/register" style={{ color: "#00bfa6", fontWeight: 700 }}>
+          <Link to="/register" style={{ color: "#4fd1c5", fontWeight: "bold" }}>
             Register
           </Link>
         </p>
@@ -99,6 +157,3 @@ export default function Login() {
     </div>
   );
 }
-
-
-
