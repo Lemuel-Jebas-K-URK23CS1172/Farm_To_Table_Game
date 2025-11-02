@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API } from "../api";
+import { API } from "../services/api";
 import { AuthContext } from "../contexts/AuthContext";
 
 export default function Login() {
@@ -90,3 +90,4 @@ export default function Login() {
     </div>
   );
 }
+
