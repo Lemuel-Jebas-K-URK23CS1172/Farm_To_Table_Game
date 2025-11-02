@@ -1,8 +1,9 @@
-// client/src/game/GameCanvas.jsx
+// src/game/GameCanvas.jsx
 import { useRef, useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-import axios from "axios";
+import { API } from "../api";
+
 import backgroundImg from "../game/assets/background.png";
 import farmerImg from "../game/assets/farmer.png";
 import fruitImg from "../game/assets/apple.png";
@@ -51,21 +52,19 @@ export default function GameCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
-    const containerWidth = window.innerWidth * 0.8; // larger on 100% zoom
-    const containerHeight = window.innerHeight * 0.7;
+    const containerWidth = window.innerWidth * 0.9;
+    const containerHeight = window.innerHeight * 0.8;
     const scale = Math.min(containerWidth / baseWidth, containerHeight / baseHeight);
     const pixelRatio = window.devicePixelRatio || 1;
 
-    // set high-res backing store
     canvas.width = Math.round(baseWidth * scale * pixelRatio);
     canvas.height = Math.round(baseHeight * scale * pixelRatio);
 
-    // CSS size for layout
     canvas.style.width = `${Math.round(baseWidth * scale)}px`;
     canvas.style.height = `${Math.round(baseHeight * scale)}px`;
-    canvas.style.maxWidth = "1400px";
+    canvas.style.display = "block";
+    canvas.style.margin = "0 auto";
 
-    // normalize to base coordinate system
     ctx.setTransform(pixelRatio * scale, 0, 0, pixelRatio * scale, 0, 0);
   };
 
@@ -90,13 +89,14 @@ export default function GameCanvas() {
     };
   }, []);
 
-  // Game loop start
+  // Game loop
   const startGameLoop = () => {
     const ctx = canvasRef.current.getContext("2d");
     const loop = (timestamp) => {
       if (!lastTime.current) lastTime.current = timestamp;
       const dt = (timestamp - lastTime.current) / 1000;
       lastTime.current = timestamp;
+
       if (gameActive.current) {
         update(dt);
         render(ctx);
@@ -110,7 +110,6 @@ export default function GameCanvas() {
   useEffect(() => {
     startGameLoop();
     return () => cancelAnimationFrame(frameId.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level]);
 
   const update = (dt) => {
@@ -130,7 +129,7 @@ export default function GameCanvas() {
     timerRef.current -= dt;
     if (timerRef.current <= 0) nextLevel();
 
-    // Spawn fruits (avoid top & bottom edges)
+    // Spawn fruits
     if (Math.random() < 0.02 * dt * 60 * level) {
       fruits.current.push({
         x: Math.random() * (baseWidth - 30),
@@ -210,28 +209,10 @@ export default function GameCanvas() {
     ctx.drawImage(farmerSprite, farmer.current.x, farmer.current.y, farmer.current.width, farmer.current.height);
   };
 
-  // Helpers
-  const triggerGameOver = () => {
-    if (!gameActive.current) return;
-    gameActive.current = false;
-    cancelAnimationFrame(frameId.current);
-    setGameOver(true);
-    saveScore();
-    if (player && monsters.some(m => checkCollision(player, m))) {
-    setGameOver(true);
-    saveGameScore(score, level);
-    }
-
-
-    // focus restart button shortly after modal opens
-    setTimeout(() => {
-      if (restartBtnRef.current) restartBtnRef.current.focus();
-    }, 80);
-  };
-
+  // ---- Backend communication ----
   const nextLevel = async () => {
     try {
-      await axios.post("/api/scores", { score, level });
+      await API.post("/scores/save", { score, level });
       setLevel((l) => l + 1);
       setScore(0);
       setTimeLeft(30);
@@ -240,25 +221,30 @@ export default function GameCanvas() {
       monsters.current = [];
       lastTime.current = 0;
     } catch (err) {
-      console.error("Score save failed:", err.message);
+      console.error("❌ Score save failed:", err.message);
     }
   };
 
   const saveScore = async () => {
     try {
-      await axios.post("/api/scores", { score, level });
+      await API.post("/scores/save", { score, level });
+      console.log("✅ Score saved successfully");
     } catch (err) {
-      console.error("Error saving on game over:", err.message);
+      console.error("❌ Error saving on game over:", err.message);
     }
   };
-function checkCollision(a, b) {
-  return (
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
-  );
-}
+
+  const triggerGameOver = () => {
+    if (!gameActive.current) return;
+
+    gameActive.current = false;
+    cancelAnimationFrame(frameId.current);
+    setGameOver(true);
+
+    saveScore();
+
+    setTimeout(() => restartBtnRef.current?.focus(), 80);
+  };
 
   const restartGame = () => {
     setGameOver(false);
@@ -276,22 +262,21 @@ function checkCollision(a, b) {
     startGameLoop();
   };
 
-  // JSX
+  // ---- UI ----
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "flex-start",
+        justifyContent: "center",
         minHeight: "100vh",
         width: "100vw",
         backgroundColor: "#111",
         color: "#fff",
         textAlign: "center",
-        overflowX: "hidden",
-        paddingTop: "20px",
-        paddingBottom: "40px",
+        overflow: "hidden",
+        padding: "20px",
       }}
     >
       {/* Canvas */}
@@ -304,8 +289,6 @@ function checkCollision(a, b) {
           borderRadius: "8px",
           backgroundColor: "#dfffd8",
           boxShadow: "0 0 25px rgba(0,0,0,0.5)",
-          display: "block",
-          margin: "0 auto",
         }}
       />
 
@@ -331,43 +314,37 @@ function checkCollision(a, b) {
         <span>⏳ <strong>Time: {timeLeft}s</strong></span>
       </div>
 
-      {/* GAME OVER MODAL (fixed overlay) */}
+      {/* GAME OVER MODAL */}
       {gameOver && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Game over dialog"
           style={{
             position: "fixed",
             inset: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            zIndex: 9999,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            padding: "20px",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 1000,
           }}
         >
           <div
             style={{
-              width: "min(720px, 92vw)",
-              maxWidth: "720px",
               background: "#0b0b0b",
               borderRadius: "12px",
               padding: "28px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(255,0,0,0.12)",
-              border: "1px solid rgba(255,0,0,0.12)",
+              border: "1px solid rgba(255,0,0,0.3)",
               textAlign: "center",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.6)",
             }}
           >
-            <h2 style={{ color: "#ff6666", fontWeight: 800, fontSize: "clamp(20px, 2.6vw, 34px)", margin: 0 }}>
-              💀 GAME OVER!
-            </h2>
-            <p style={{ marginTop: "14px", fontSize: "clamp(16px, 1.6vw, 20px)" }}>
+            <h2 style={{ color: "#ff6666", fontWeight: 800, fontSize: "2rem" }}>💀 GAME OVER!</h2>
+            <p style={{ marginTop: "14px", fontSize: "1.2rem" }}>
               Your final score: <strong>{score}</strong>
             </p>
 
-            <div style={{ marginTop: "20px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+            <div style={{ marginTop: "20px", display: "flex", gap: "12px", justifyContent: "center" }}>
               <button
                 ref={restartBtnRef}
                 onClick={restartGame}
@@ -378,7 +355,7 @@ function checkCollision(a, b) {
                   borderRadius: "8px",
                   color: "white",
                   cursor: "pointer",
-                  fontSize: "clamp(14px, 1.6vw, 18px)",
+                  fontSize: "1rem",
                   fontWeight: 700,
                 }}
               >
@@ -395,7 +372,7 @@ function checkCollision(a, b) {
                   borderRadius: "8px",
                   color: "white",
                   cursor: "pointer",
-                  fontSize: "clamp(14px, 1.6vw, 18px)",
+                  fontSize: "1rem",
                   fontWeight: 700,
                 }}
               >
@@ -408,7 +385,3 @@ function checkCollision(a, b) {
     </div>
   );
 }
-
-
-
-
