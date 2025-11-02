@@ -1,94 +1,78 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { API } from "../services/api";
-export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+const router = express.Router();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+// ✅ REGISTER (with user/admin role selection)
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
 
-    try {
-      // 👈 add this import at the top
-
-      const res = await API.post("/auth/register", form);
-
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      navigate("/game");
-    } catch (err) {
-      setError("Registration failed. Please try again.");
-    } finally {
-      setLoading(false);
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
     }
-  };
 
-  return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "linear-gradient(145deg, #072a2a, #041f1f)",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 400,
-          padding: "40px",
-          backgroundColor: "rgba(255, 255, 255, 0.08)",
-          borderRadius: 16,
-          boxShadow: "0 0 20px rgba(0,255,200,0.2)",
-        }}
-      >
-        <h2 style={{ textAlign: "center", marginBottom: 20, color: "#00ffc6" }}>Register</h2>
-        <form onSubmit={handleSubmit}>
-          <label>Name</label>
-          <input name="name" type="text" onChange={handleChange} required />
-          <label style={{ marginTop: 10 }}>Email</label>
-          <input name="email" type="email" onChange={handleChange} required />
-          <label style={{ marginTop: 10 }}>Password</label>
-          <input name="password" type="password" onChange={handleChange} required />
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-          {error && (
-            <div style={{ color: "#ffb3b3", marginTop: 8, textAlign: "center" }}>{error}</div>
-          )}
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              marginTop: 16,
-              backgroundColor: "#00ffc3",
-              border: "none",
-              borderRadius: 10,
-              color: "#042a29",
-              padding: "10px 0",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {loading ? "Creating Account..." : "Register"}
-          </button>
-        </form>
-        <p style={{ marginTop: 12, textAlign: "center", color: "rgba(255,255,255,0.7)" }}>
-          Already have an account?{" "}
-          <Link to="/login" style={{ color: "#00bfa6", fontWeight: 700 }}>
-            Login
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
-}
+    // ✅ Allow user to select role (for demo only)
+    const validRole = role === "admin" ? "admin" : "user";
 
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: validRole,
+    });
 
+    res.status(201).json({
+      message: `User registered successfully as ${validRole}`,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error("❌ Register error:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ LOGIN
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error("❌ Login error:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+export default router;
