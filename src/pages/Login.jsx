@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { API } from "../api";
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -16,10 +16,7 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await axios.post(
-        "https://farmtotablegameserver-production.up.railway.app/api/auth/login",
-        form
-      );
+      const res = await API.post("/auth/login", form);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/game");
     } catch (err) {
@@ -88,3 +85,4 @@ export default function Login() {
     </div>
   );
 }
+
