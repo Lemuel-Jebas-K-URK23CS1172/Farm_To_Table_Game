@@ -1,11 +1,11 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API } from "../services/api";
+import { API } from "../api"; // ✅ make sure this path is correct (../api or ../services/api)
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -15,17 +15,16 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setError("");
     setLoading(true);
 
     try {
       const res = await API.post("/auth/login", form);
       const { token, user } = res.data;
 
-      if (!user) throw new Error("Invalid user data from server");
+      if (!user) throw new Error("Invalid user data");
 
-      // ✅ Save token and user info in localStorage
-      if (token) localStorage.setItem("token", token);
+      localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
       console.log("✅ Login successful:", user);
@@ -37,7 +36,7 @@ export default function Login() {
         navigate("/game");
       }
     } catch (err) {
-      console.error("❌ Login error:", err.response?.data || err.message);
+      console.error("❌ Login failed:", err);
       setError("Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
@@ -47,89 +46,84 @@ export default function Login() {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         minHeight: "100vh",
-        backgroundColor: "#0a0a0a",
+        backgroundColor: "#000",
         color: "#fff",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
       <div
         style={{
           backgroundColor: "#111",
-          borderRadius: "12px",
           padding: "40px",
+          borderRadius: "12px",
           width: "90%",
           maxWidth: "400px",
+          boxShadow: "0 0 25px rgba(0,0,0,0.6)",
           textAlign: "center",
-          boxShadow: "0 0 25px rgba(0, 0, 0, 0.6)",
         }}
       >
         <h2 style={{ marginBottom: "20px" }}>🌾 Farm to Table Login</h2>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "16px" }}>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "6px",
-                border: "1px solid #555",
-                background: "#222",
-                color: "#fff",
-              }}
-            />
-          </div>
-          <div style={{ marginBottom: "16px" }}>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "6px",
-                border: "1px solid #555",
-                background: "#222",
-                color: "#fff",
-              }}
-            />
-          </div>
-
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "14px",
+              borderRadius: "6px",
+              border: "1px solid #555",
+              background: "#222",
+              color: "#fff",
+            }}
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            required
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: "14px",
+              borderRadius: "6px",
+              border: "1px solid #555",
+              background: "#222",
+              color: "#fff",
+            }}
+          />
           {error && (
-            <div style={{ color: "#ff6666", marginBottom: "12px" }}>{error}</div>
+            <p style={{ color: "#ff5555", marginBottom: "10px" }}>{error}</p>
           )}
-
           <button
             type="submit"
             disabled={loading}
             style={{
+              width: "100%",
               backgroundColor: "#00cc66",
               color: "#111",
-              border: "none",
-              borderRadius: "8px",
-              padding: "10px 18px",
-              cursor: "pointer",
               fontWeight: "700",
-              width: "100%",
+              border: "none",
+              borderRadius: "6px",
+              padding: "10px",
+              cursor: "pointer",
             }}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-
-        <p style={{ marginTop: "16px" }}>
+        <p style={{ marginTop: "14px" }}>
           Don’t have an account?{" "}
-          <Link to="/register" style={{ color: "#00ccff", fontWeight: "700" }}>
+          <Link to="/register" style={{ color: "#00ccff" }}>
             Register
           </Link>
         </p>
