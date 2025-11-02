@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { API } from "../services/api"; // ✅ make sure this path is correct (../api or ../services/api)
+import { API } from "../api"; // ✅ ensure this points to your API file
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -22,22 +22,25 @@ export default function Login() {
       const res = await API.post("/auth/login", form);
       const { token, user } = res.data;
 
-      if (!user) throw new Error("Invalid user data");
+      if (!user || !token) {
+        throw new Error("Invalid response from server");
+      }
 
+      // ✅ store login info
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
       console.log("✅ Login successful:", user);
 
-      // ✅ Redirect based on role
+      // ✅ redirect based on role
       if (user.role === "admin") {
-        navigate("/admin");
+        navigate("/admin", { replace: true });
       } else {
-        navigate("/game");
+        navigate("/game", { replace: true });
       }
     } catch (err) {
       console.error("❌ Login failed:", err);
-      setError("Invalid credentials. Please try again.");
+      setError("Invalid credentials or network error.");
     } finally {
       setLoading(false);
     }
@@ -52,6 +55,7 @@ export default function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        padding: "20px",
       }}
     >
       <div
@@ -59,13 +63,14 @@ export default function Login() {
           backgroundColor: "#111",
           padding: "40px",
           borderRadius: "12px",
-          width: "90%",
+          width: "100%",
           maxWidth: "400px",
           boxShadow: "0 0 25px rgba(0,0,0,0.6)",
           textAlign: "center",
         }}
       >
-        <h2 style={{ marginBottom: "20px" }}>🌾 Farm to Table Login</h2>
+        <h2 style={{ marginBottom: "20px", color: "#00cc66" }}>🌾 Farm to Table Login</h2>
+
         <form onSubmit={handleSubmit}>
           <input
             type="email"
@@ -84,6 +89,7 @@ export default function Login() {
               color: "#fff",
             }}
           />
+
           <input
             type="password"
             name="password"
@@ -101,9 +107,11 @@ export default function Login() {
               color: "#fff",
             }}
           />
+
           {error && (
-            <p style={{ color: "#ff5555", marginBottom: "10px" }}>{error}</p>
+            <p style={{ color: "#ff4444", marginBottom: "10px" }}>{error}</p>
           )}
+
           <button
             type="submit"
             disabled={loading}
@@ -116,14 +124,16 @@ export default function Login() {
               borderRadius: "6px",
               padding: "10px",
               cursor: "pointer",
+              transition: "0.3s",
             }}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <p style={{ marginTop: "14px" }}>
+
+        <p style={{ marginTop: "14px", fontSize: "0.9rem" }}>
           Don’t have an account?{" "}
-          <Link to="/register" style={{ color: "#00ccff" }}>
+          <Link to="/register" style={{ color: "#00ccff", textDecoration: "none" }}>
             Register
           </Link>
         </p>
@@ -131,4 +141,3 @@ export default function Login() {
     </div>
   );
 }
-
