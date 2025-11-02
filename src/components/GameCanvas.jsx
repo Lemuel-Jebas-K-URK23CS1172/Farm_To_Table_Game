@@ -217,10 +217,11 @@ export default function GameCanvas() {
     cancelAnimationFrame(frameId.current);
     setGameOver(true);
     saveScore();
-    if (hit) {
+    if (player && monsters.some(m => checkCollision(player, m))) {
     setGameOver(true);
     saveGameScore(score, level);
     }
+
 
     // focus restart button shortly after modal opens
     setTimeout(() => {
@@ -250,6 +251,14 @@ export default function GameCanvas() {
       console.error("Error saving on game over:", err.message);
     }
   };
+function checkCollision(a, b) {
+  return (
+    a.x < b.x + b.width &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.height &&
+    a.y + a.height > b.y
+  );
+}
 
   const restartGame = () => {
     setGameOver(false);
@@ -399,6 +408,7 @@ export default function GameCanvas() {
     </div>
   );
 }
+
 
 
 
