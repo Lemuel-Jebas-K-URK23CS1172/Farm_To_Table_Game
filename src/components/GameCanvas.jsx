@@ -16,13 +16,11 @@ export default function GameCanvas() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // UI states
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [timeLeft, setTimeLeft] = useState(30);
   const [gameOver, setGameOver] = useState(false);
 
-  // Game state
   const farmer = useRef({ x: 380, y: 180, width: 32, height: 32, speed: 200 });
   const fruits = useRef([]);
   const monsters = useRef([]);
@@ -32,11 +30,9 @@ export default function GameCanvas() {
   const frameId = useRef(null);
   const gameActive = useRef(false);
 
-  // Base resolution
   const baseWidth = 800;
   const baseHeight = 400;
 
-  // Sprites
   const background = new Image();
   background.src = backgroundImg;
   const farmerSprite = new Image();
@@ -46,21 +42,18 @@ export default function GameCanvas() {
   const monsterSprite = new Image();
   monsterSprite.src = monsterImg;
 
-  // Resize handling
   const resizeCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-
     const containerWidth = window.innerWidth * 0.8;
     const containerHeight = window.innerHeight * 0.7;
     const scale = Math.min(containerWidth / baseWidth, containerHeight / baseHeight);
     const pixelRatio = window.devicePixelRatio || 1;
-
-    canvas.width = Math.round(baseWidth * scale * pixelRatio);
-    canvas.height = Math.round(baseHeight * scale * pixelRatio);
-    canvas.style.width = `${Math.round(baseWidth * scale)}px`;
-    canvas.style.height = `${Math.round(baseHeight * scale)}px`;
+    canvas.width = baseWidth * scale * pixelRatio;
+    canvas.height = baseHeight * scale * pixelRatio;
+    canvas.style.width = `${baseWidth * scale}px`;
+    canvas.style.height = `${baseHeight * scale}px`;
     ctx.setTransform(pixelRatio * scale, 0, 0, pixelRatio * scale, 0, 0);
   };
 
@@ -70,7 +63,6 @@ export default function GameCanvas() {
     return () => window.removeEventListener("resize", resizeCanvas);
   }, []);
 
-  // Keyboard input
   useEffect(() => {
     const handleDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
@@ -85,7 +77,6 @@ export default function GameCanvas() {
     };
   }, []);
 
-  // Game loop
   const startGameLoop = () => {
     const ctx = canvasRef.current.getContext("2d");
     const loop = (timestamp) => {
@@ -109,22 +100,17 @@ export default function GameCanvas() {
 
   const update = (dt) => {
     if (!gameActive.current) return;
-
-    // Movement
     if (keys.current["ArrowRight"]) farmer.current.x += farmer.current.speed * dt;
     if (keys.current["ArrowLeft"]) farmer.current.x -= farmer.current.speed * dt;
     if (keys.current["ArrowUp"]) farmer.current.y -= farmer.current.speed * dt;
     if (keys.current["ArrowDown"]) farmer.current.y += farmer.current.speed * dt;
 
-    // Bounds
     farmer.current.x = Math.max(0, Math.min(farmer.current.x, baseWidth - farmer.current.width));
     farmer.current.y = Math.max(0, Math.min(farmer.current.y, baseHeight - farmer.current.height));
 
-    // Timer
     timerRef.current -= dt;
     if (timerRef.current <= 0) nextLevel();
 
-    // Spawn fruits
     if (Math.random() < 0.02 * dt * 60 * level) {
       fruits.current.push({
         x: Math.random() * (baseWidth - 30),
@@ -135,7 +121,6 @@ export default function GameCanvas() {
       });
     }
 
-    // Spawn monsters
     if (Math.random() < 0.004 * dt * 60 * level && monsters.current.length < 5 + level) {
       monsters.current.push({
         x: Math.random() * (baseWidth - 40),
@@ -148,7 +133,6 @@ export default function GameCanvas() {
       });
     }
 
-    // Fruit logic
     fruits.current.forEach((f, i) => {
       f.age += dt;
       if (f.age > f.lifetime) f.rotten = true;
@@ -163,13 +147,11 @@ export default function GameCanvas() {
       }
     });
 
-    // Monster logic
     monsters.current.forEach((m) => {
       m.x += m.dirX * m.speed * dt;
       m.y += m.dirY * m.speed * dt;
       if (m.x <= 0 || m.x >= baseWidth - m.width) m.dirX *= -1;
       if (m.y <= 0 || m.y >= baseHeight - m.height) m.dirY *= -1;
-
       if (
         farmer.current.x < m.x + m.width &&
         farmer.current.x + farmer.current.width > m.x &&
@@ -186,21 +168,8 @@ export default function GameCanvas() {
   const render = (ctx) => {
     ctx.clearRect(0, 0, baseWidth, baseHeight);
     ctx.drawImage(background, 0, 0, baseWidth, baseHeight);
-
-    fruits.current.forEach((f) => {
-      ctx.drawImage(fruitSprite, f.x, f.y, 20, 20);
-      if (f.rotten) {
-        ctx.globalAlpha = 0.6;
-        ctx.fillStyle = "brown";
-        ctx.fillRect(f.x, f.y, 20, 20);
-        ctx.globalAlpha = 1;
-      }
-    });
-
-    monsters.current.forEach((m) => {
-      ctx.drawImage(monsterSprite, m.x, m.y, 30, 30);
-    });
-
+    fruits.current.forEach((f) => ctx.drawImage(fruitSprite, f.x, f.y, 20, 20));
+    monsters.current.forEach((m) => ctx.drawImage(monsterSprite, m.x, m.y, 30, 30));
     ctx.drawImage(farmerSprite, farmer.current.x, farmer.current.y, farmer.current.width, farmer.current.height);
   };
 
@@ -210,7 +179,6 @@ export default function GameCanvas() {
     cancelAnimationFrame(frameId.current);
     setGameOver(true);
     saveScore();
-
     setTimeout(() => restartBtnRef.current?.focus(), 80);
   };
 
@@ -277,31 +245,15 @@ export default function GameCanvas() {
         }}
       />
 
-      <div
-        style={{
-          marginTop: "18px",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "15px",
-          backgroundColor: "rgba(0,0,0,0.6)",
-          borderRadius: "10px",
-          padding: "10px 20px",
-          boxShadow: "0 0 10px rgba(0,0,0,0.4)",
-          fontSize: "clamp(14px, 1.6vw, 22px)",
-        }}
-      >
-        <span>👤 <strong>{user?.name || "Guest"}</strong></span>
-        <span>🧺 <strong>Score: {score}</strong></span>
-        <span>🌾 <strong>Level: {level}</strong></span>
-        <span>⏳ <strong>Time: {timeLeft}s</strong></span>
+      <div style={{ marginTop: "18px", display: "flex", gap: "15px" }}>
+        <span>👤 {user?.name || "Guest"}</span>
+        <span>🧺 Score: {score}</span>
+        <span>🌾 Level: {level}</span>
+        <span>⏳ Time: {timeLeft}s</span>
       </div>
 
       {gameOver && (
         <div
-          role="dialog"
-          aria-modal="true"
           style={{
             position: "fixed",
             inset: 0,
@@ -314,7 +266,6 @@ export default function GameCanvas() {
         >
           <div
             style={{
-              width: "min(720px, 92vw)",
               background: "#0b0b0b",
               borderRadius: "12px",
               padding: "28px",
@@ -322,39 +273,38 @@ export default function GameCanvas() {
             }}
           >
             <h2 style={{ color: "#ff6666" }}>💀 GAME OVER!</h2>
-            <p style={{ marginTop: "14px" }}>Your final score: <strong>{score}</strong></p>
+            <p>Your final score: {score}</p>
 
-            <div style={{ marginTop: "20px", display: "flex", gap: "12px", justifyContent: "center" }}>
-              <button
-                ref={restartBtnRef}
-                onClick={restartGame}
-                style={{
-                  padding: "10px 22px",
-                  background: "#28a745",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                🔁 Restart
-              </button>
+            <button
+              ref={restartBtnRef}
+              onClick={restartGame}
+              style={{
+                background: "#28a745",
+                border: "none",
+                borderRadius: "8px",
+                padding: "10px 22px",
+                color: "white",
+                cursor: "pointer",
+                marginRight: "10px",
+              }}
+            >
+              🔁 Restart
+            </button>
 
-              <button
-                ref={backBtnRef}
-                onClick={() => navigate("/")}
-                style={{
-                  padding: "10px 22px",
-                  background: "#007bff",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                🏠 Back to Menu
-              </button>
-            </div>
+            <button
+              ref={backBtnRef}
+              onClick={() => navigate("/")}
+              style={{
+                background: "#007bff",
+                border: "none",
+                borderRadius: "8px",
+                padding: "10px 22px",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              🏠 Back to Menu
+            </button>
           </div>
         </div>
       )}
