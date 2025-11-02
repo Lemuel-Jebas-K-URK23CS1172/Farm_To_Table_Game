@@ -1,15 +1,15 @@
 name: Deploy Vite app to GitHub Pages
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+  
 on:
   push:
     branches: [main]
 
 permissions:
   contents: write
-  
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
 
 jobs:
   build-deploy:
