@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { API } from "../api";
 export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
@@ -16,10 +16,10 @@ export default function Register() {
     setError("");
 
     try {
-      const res = await axios.post(
-        "https://farmtotablegameserver-production.up.railway.app/api/auth/register",
-        form
-      );
+      // 👈 add this import at the top
+
+      const res = await API.post("/auth/register", form);
+
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/game");
     } catch (err) {
@@ -90,3 +90,4 @@ export default function Register() {
     </div>
   );
 }
+
