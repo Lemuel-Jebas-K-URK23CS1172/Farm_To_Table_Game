@@ -2,7 +2,7 @@
 import { useRef, useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-import axios from "axios";
+import { API } from "../api";
 
 import backgroundImg from "../game/assets/background.png";
 import farmerImg from "../game/assets/farmer.png";
@@ -29,6 +29,7 @@ export default function GameCanvas() {
   const lastTime = useRef(0);
   const frameId = useRef(null);
   const gameActive = useRef(false);
+  const scoreRef = useRef(0); // ✅ track accurate score across frames
 
   const baseWidth = 800;
   const baseHeight = 400;
@@ -100,6 +101,7 @@ export default function GameCanvas() {
 
   const update = (dt) => {
     if (!gameActive.current) return;
+
     if (keys.current["ArrowRight"]) farmer.current.x += farmer.current.speed * dt;
     if (keys.current["ArrowLeft"]) farmer.current.x -= farmer.current.speed * dt;
     if (keys.current["ArrowUp"]) farmer.current.y -= farmer.current.speed * dt;
@@ -142,7 +144,13 @@ export default function GameCanvas() {
         farmer.current.y < f.y + 20 &&
         farmer.current.y + farmer.current.height > f.y
       ) {
-        if (!f.rotten) setScore((s) => s + 10);
+        if (!f.rotten) {
+          setScore((s) => {
+            const newScore = s + 10;
+            scoreRef.current = newScore;
+            return newScore;
+          });
+        }
         fruits.current.splice(i, 1);
       }
     });
@@ -184,30 +192,41 @@ export default function GameCanvas() {
 
   const nextLevel = async () => {
     try {
-      await axios.post("/api/scores", { score, level });
+      await API.post("/scores", {
+        score: scoreRef.current,
+        level,
+        userId: user?.id,
+      });
       setLevel((l) => l + 1);
       setScore(0);
+      scoreRef.current = 0;
       setTimeLeft(30);
       timerRef.current = 30;
       fruits.current = [];
       monsters.current = [];
       lastTime.current = 0;
     } catch (err) {
-      console.error("Score save failed:", err.message);
+      console.error("❌ Score save failed:", err.message);
     }
   };
 
   const saveScore = async () => {
     try {
-      await axios.post("/api/scores", { score, level });
+      await API.post("/scores", {
+        score: scoreRef.current,
+        level,
+        userId: user?.id,
+      });
+      console.log("✅ Score saved successfully:", scoreRef.current);
     } catch (err) {
-      console.error("Error saving on game over:", err.message);
+      console.error("❌ Error saving on game over:", err.message);
     }
   };
 
   const restartGame = () => {
     setGameOver(false);
     setScore(0);
+    scoreRef.current = 0;
     setLevel(1);
     setTimeLeft(30);
     timerRef.current = 30;
@@ -245,15 +264,31 @@ export default function GameCanvas() {
         }}
       />
 
-      <div style={{ marginTop: "18px", display: "flex", gap: "15px" }}>
-        <span>👤 {user?.name || "Guest"}</span>
-        <span>🧺 Score: {score}</span>
-        <span>🌾 Level: {level}</span>
-        <span>⏳ Time: {timeLeft}s</span>
+      <div
+        style={{
+          marginTop: "18px",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "15px",
+          backgroundColor: "rgba(0,0,0,0.6)",
+          borderRadius: "10px",
+          padding: "10px 20px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.4)",
+          fontSize: "clamp(14px, 1.6vw, 22px)",
+        }}
+      >
+        <span>👤 <strong>{user?.name || "Guest"}</strong></span>
+        <span>🧺 <strong>Score: {score}</strong></span>
+        <span>🌾 <strong>Level: {level}</strong></span>
+        <span>⏳ <strong>Time: {timeLeft}s</strong></span>
       </div>
 
       {gameOver && (
         <div
+          role="dialog"
+          aria-modal="true"
           style={{
             position: "fixed",
             inset: 0,
