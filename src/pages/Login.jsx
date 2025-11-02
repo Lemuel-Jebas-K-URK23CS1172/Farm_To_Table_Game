@@ -9,32 +9,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(null);
-  setLoading(true);
-
-  try {
-    const res = await API.post("/auth/login", form);
-    const { token, user } = res.data;
-
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    // ✅ Navigate correctly based on role
-    if (user.role === "admin") {
-      navigate("/admin");
-    } else {
-      navigate("/game");
-    }
-  } catch (err) {
-    console.error("Login error:", err.response?.data || err.message);
-    setError("Invalid credentials. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,14 +20,18 @@ export default function Login() {
 
     try {
       const res = await API.post("/auth/login", form);
-      console.log("✅ Login success:", res.data);
+      const { token, user } = res.data;
 
-      // Save token and user info
-      if (res.data.token) localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      if (!user) throw new Error("Invalid user data from server");
 
-      // Redirect based on role
-      if (res.data.user.role === "admin") {
+      // ✅ Save token and user info in localStorage
+      if (token) localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      console.log("✅ Login successful:", user);
+
+      // ✅ Redirect based on role
+      if (user.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/game");
@@ -147,7 +128,7 @@ export default function Login() {
         </form>
 
         <p style={{ marginTop: "16px" }}>
-          Don't have an account?{" "}
+          Don’t have an account?{" "}
           <Link to="/register" style={{ color: "#00ccff", fontWeight: "700" }}>
             Register
           </Link>
@@ -156,4 +137,3 @@ export default function Login() {
     </div>
   );
 }
-
