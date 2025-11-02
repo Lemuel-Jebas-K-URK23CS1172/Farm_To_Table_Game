@@ -11,6 +11,7 @@ import AdminPage from "./pages/AdminPage";
 
 // ...
 <Route path="/admin" element={<AdminPage />} />
+<Route path="/admin" element={<AdminDashboard />} />
 
 export default function App() {
   return (
