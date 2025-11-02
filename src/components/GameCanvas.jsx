@@ -32,6 +32,9 @@ export default function GameCanvas() {
   const frameId = useRef(null);
   const gameActive = useRef(false);
 
+  // ✅ Track live score value (fix for stale React state)
+  const scoreRef = useRef(0);
+
   // Logical base resolution
   const baseWidth = 800;
   const baseHeight = 400;
@@ -59,7 +62,6 @@ export default function GameCanvas() {
 
     canvas.width = Math.round(baseWidth * scale * pixelRatio);
     canvas.height = Math.round(baseHeight * scale * pixelRatio);
-
     canvas.style.width = `${Math.round(baseWidth * scale)}px`;
     canvas.style.height = `${Math.round(baseHeight * scale)}px`;
     canvas.style.display = "block";
@@ -74,7 +76,7 @@ export default function GameCanvas() {
     return () => window.removeEventListener("resize", resizeCanvas);
   }, []);
 
-  // Keyboard
+  // Keyboard handling
   useEffect(() => {
     const handleDown = (e) => {
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
@@ -163,7 +165,13 @@ export default function GameCanvas() {
         farmer.current.y < f.y + 20 &&
         farmer.current.y + farmer.current.height > f.y
       ) {
-        if (!f.rotten) setScore((s) => s + 10);
+        if (!f.rotten) {
+          setScore((s) => {
+            const next = s + 10;
+            scoreRef.current = next; // ✅ keep ref synced
+            return next;
+          });
+        }
         fruits.current.splice(i, 1);
       }
     });
@@ -212,9 +220,11 @@ export default function GameCanvas() {
   // ---- Backend communication ----
   const nextLevel = async () => {
     try {
-      await API.post("/scores/save", { score, level });
+      console.log("Saving level progress:", scoreRef.current, level);
+      await API.post("/scores/save", { score: scoreRef.current, level });
       setLevel((l) => l + 1);
       setScore(0);
+      scoreRef.current = 0;
       setTimeLeft(30);
       timerRef.current = 30;
       fruits.current = [];
@@ -227,7 +237,8 @@ export default function GameCanvas() {
 
   const saveScore = async () => {
     try {
-      await API.post("/scores/save", { score, level });
+      console.log("Saving final score:", scoreRef.current, level);
+      await API.post("/scores/save", { score: scoreRef.current, level });
       console.log("✅ Score saved successfully");
     } catch (err) {
       console.error("❌ Error saving on game over:", err.message);
@@ -236,19 +247,17 @@ export default function GameCanvas() {
 
   const triggerGameOver = () => {
     if (!gameActive.current) return;
-
     gameActive.current = false;
     cancelAnimationFrame(frameId.current);
     setGameOver(true);
-
     saveScore();
-
     setTimeout(() => restartBtnRef.current?.focus(), 80);
   };
 
   const restartGame = () => {
     setGameOver(false);
     setScore(0);
+    scoreRef.current = 0;
     setLevel(1);
     setTimeLeft(30);
     timerRef.current = 30;
@@ -385,4 +394,3 @@ export default function GameCanvas() {
     </div>
   );
 }
-
